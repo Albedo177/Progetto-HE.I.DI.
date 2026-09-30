@@ -1,40 +1,23 @@
-PROGETTO MATERIA PROGRAMMAZIONE WEB E MOBILE
-------------------------------------------------------
-PROJECT FOR BACHERLOR'S DEGREE SUBJECT: Alberto Scannaliato, Paolosalvatore Piazza
+# HEIDI - Healthy Interactive Diet
 
-HEIDI IS A WEB APP.
+**HEIDI** è un'applicazione full-stack (Web & Mobile) progettata per la gestione e il tracciamento personalizzato di piani alimentari e schede di allenamento, integrata con funzionalità di community e interazione con figure specializzate (*Food* e *Workout Specialist*).
 
-The acronym HE.I.DI. stands for HEalthy Interactive DIet.
+---
 
-FEATURES
-The basic idea is to allow users to keep progress of their diet and workout plans by tracking food eaten and exercises done, visualizing properties like calories and others.
+## 🛠 Tech Stack
 
-Users can log in and interact with the application, program a schedule based on their need and ask for advice. The application should memorize their data and allow to
-professional users to review and change it.
+### Frontend
+- **Framework:** Angular & Ionic Framework
+- **Cross-Platform Runtime:** Capacitor (Android / Web)
+- **State & HTTP:** RxJS, HttpClient, Angular Router
 
-Users can consult a database where food and exercises are stored, they can see properties as calories, sugar, grease, proteins, vitamins held by a food sample.
-Also they can know about which muscles are affected by an exercise sample
+### Backend
+- **Runtime & Server:** Node.js, Express.js
+- **Database:** SQLite (tramite `sqlite3` driver)
+- **Authentication & Security:** JSON Web Tokens (JWT), bcrypt
 
+---
 
------------------------------------------------------
-SAMPLE DATA FOR QUICK ACCESS TO APPLICATION
+## 🏛 Architettura del Sistema
 
-USER---
-
-
-Food Specialist---
-
-Workout Specialist---
-
------------------------------------------------------
-NOTA PER IL PROFESSORE:
-
-Buonasera professore, sappiamo quanto la fase di registrazione sia importante per controllare che l'app funzioni, ma in caso volesse accedere velocemente può usare i dati forniti per account già creati che ricoprono i vari tipi di utente che usano l'applicazione.
-
-In più, se si vuole avviare l'app tramite android studio, si deve modificare la proprietà 'apiUrl' nei files:
-- environment.ts
-- environment.prod.ts
-
-E sostituire 'localhost' con l'indirizzo IP della sua macchina.
-
-Le auguriamo una buona giornata!
+L'applicazione segue un'architettura **Client-Server tre livelli** fortemente disaccoppiata.
