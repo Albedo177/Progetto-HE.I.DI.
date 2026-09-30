@@ -2,162 +2,175 @@ const AllenamentiServices = require('../services/allenamentiServices');
 
 class AllenamentiControllers {
 
-    static getEsercizi = async (req, res) =>{
+    // GET elenco completo esercizi
+    static getEsercizi = async (req, res, next) => {
         try {
             const esercizi = await AllenamentiServices.getAllEsercizi();
             res.json(esercizi);
-        } catch(e) {
-            res.status(500).json({error: e.message});
+        } catch (e) {
+            next(e);
         }
     };
 
-    //restituisce un esercizio dato il suo ID
-    static getEsercizioById = async (req, res) => {
+    // GET singolo esercizio dato l'ID
+    static getEsercizioById = async (req, res, next) => {
         try {
-            const id_esercizio = req.params.id_esercizio;
+            const { id_esercizio } = req.params;
             const esercizio = await AllenamentiServices.getEsercizioById(id_esercizio);
-            if(esercizio){
-                res.json(esercizio);
-            }else{
-                res.status(404).json({error: 'Esercizio non trovato'})
+            if (!esercizio) {
+                const err = new Error('Esercizio non trovato');
+                err.statusCode = 404;
+                return next(err);
             }
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.json(esercizio);
+        } catch (e) {
+            next(e);
         }
     };
 
-    static getAllenamenti = async (req, res) =>{
+    // GET elenco tutti gli allenamenti
+    static getAllenamenti = async (req, res, next) => {
         try {
             const allenamenti = await AllenamentiServices.getAllAllenamenti();
             res.json(allenamenti);
-        } catch(e) {
-            res.status(500).json({error: e.message});
+        } catch (e) {
+            next(e);
         }
     };
 
-    static getEserciziAllenamenti = async (req, res) =>{
+    // GET associazioni esercizi-allenamenti
+    static getEserciziAllenamenti = async (req, res, next) => {
         try {
             const eserciziAllenamenti = await AllenamentiServices.getAllEserciziAllenamenti();
             res.json(eserciziAllenamenti);
-        } catch(e) {
-            res.status(500).json({error: e.message});
+        } catch (e) {
+            next(e);
         }
     };
 
-    static getDettagliAllenamento = async (req, res) =>{
+    // GET dettagli di un allenamento dato l'ID
+    static getDettagliAllenamento = async (req, res, next) => {
         try {
-            const id_allenamento = req.params.id_allenamento;
+            const { id_allenamento } = req.params;
             const dettagliAllenamento = await AllenamentiServices.getDettagliAllenamento(id_allenamento);
-            if(dettagliAllenamento){
-                res.json(dettagliAllenamento);
-            }else{
-                res.status(400).json({error: 'allenamento non trovato'});
+            if (!dettagliAllenamento) {
+                const err = new Error('Dettagli allenamento non trovati');
+                err.statusCode = 404;
+                return next(err);
             }
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.json(dettagliAllenamento);
+        } catch (e) {
+            next(e);
         }
     };
 
-    static getAllenamentoById = async (req, res) => {
+    // GET allenamento dato l'ID
+    static getAllenamentoById = async (req, res, next) => {
         try {
-            const id_allenamento = req.params.id_allenamento;
+            const { id_allenamento } = req.params;
             const allenamento = await AllenamentiServices.getAllenamentoById(id_allenamento);
-            if(allenamento){
-                res.json(allenamento);
-            }else{
-                res.status(404).json({error: 'allenamento non trovato'});
+            if (!allenamento) {
+                const err = new Error('Allenamento non trovato');
+                err.statusCode = 404;
+                return next(err);
             }
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.json(allenamento);
+        } catch (e) {
+            next(e);
         }
     };
 
-    static getAllenamentiUtente = async (req, res) =>{
+    // GET allenamenti dell'utente autenticato
+    static getAllenamentiUtente = async (req, res, next) => {
         try {
             const user_id = req.user.id;
             const allenamentiUtente = await AllenamentiServices.getAllenamentiUtente(user_id);
             res.json(allenamentiUtente);
-        } catch(e) {
-            res.status(500).json({error: e.message});
+        } catch (e) {
+            next(e);
         }
     };
 
-    static checkAllenamento = async (req, res) =>{
+    // POST verifica esistenza allenamento per un dato giorno
+    static checkAllenamento = async (req, res, next) => {
         try {
-            const {giorno} = req.body;
+            const { giorno } = req.body;
             const user_id = req.user.id;
             const exists = await AllenamentiServices.checkAllenamento(user_id, giorno);
-            res.status(200).json({exists});
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.status(201).json({ exists });
+        } catch (e) {
+            next(e);
         }
     };
 
-    static creaAllenamenti = async (req, res) =>{
+    // POST crea una nuova scheda di allenamento
+    static creaAllenamenti = async (req, res, next) => {
         try {
-            const {nome, giorno, durata, data_creazione} = req.body;
+            const { nome, giorno, durata, data_creazione } = req.body;
             const user_id = req.user.id;
             const result = await AllenamentiServices.creaAllenamenti(user_id, nome, giorno, durata, data_creazione);
-            res.status(201).json({message: 'Allenamento creato con successo:', id: result});
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.status(201).json({ message: 'Allenamento creato con successo', id: result });
+        } catch (e) {
+            next(e);
         }
-
     };
 
-    static riempiAllenamento = async (req, res) =>{
+    // POST inserisce gli esercizi all'interno di una scheda
+    static riempiAllenamento = async (req, res, next) => {
         try {
-            const {id_allenamento, esercizi} = req.body;
-            const user_id = req.user.id;
+            const { id_allenamento, esercizi } = req.body;
             const result = await AllenamentiServices.riempiAllenamento(id_allenamento, esercizi);
-            res.status(201).json({message: 'Allenamento riempito con successo', id: result});
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.status(201).json({ message: 'Allenamento riempito con successo', id: result });
+        } catch (e) {
+            next(e);
         }
     };
 
-    static modificaAllenamento = async (req, res) =>{
+    // PUT/POST modifica una scheda di allenamento
+    static modificaAllenamento = async (req, res, next) => {
         try {
-            const {id_allenamento, modifiche_allenamento} = req.body;
-            const user_id = req.user.id;
+            const { id_allenamento, modifiche_allenamento } = req.body;
             const result = await AllenamentiServices.modificaAllenamento(id_allenamento, modifiche_allenamento);
-            res.status(201).json({message: 'Allenamento modificato con successo', result});
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.status(201).json({ message: 'Allenamento modificato con successo', result });
+        } catch (e) {
+            next(e);
         }
     };
 
-    static programmaAllenamento = async (req, res) =>{
+    // POST assegna un allenamento ad una data nel calendario
+    static programmaAllenamento = async (req, res, next) => {
         try {
-            const {id_allenamento, data_calendario} = req.body;
-            const user_id = req.user.id;
+            const { id_allenamento, data_calendario } = req.body;
             const result = await AllenamentiServices.programmaAllenamento(id_allenamento, data_calendario);
-            res.status(201).json({message: 'Allenamento programmato con successo', result});
+            res.status(201).json({ message: 'Allenamento programmato con successo', result });
         } catch (e) {
-            res.status(500).json({error: e.message});            
+            next(e);
         }
     };
 
-    static clonaAllenamento = async(req, res) => {
+    // POST duplica un allenamento dalla bacheca alla propria scheda
+    static clonaAllenamento = async (req, res, next) => {
         try {
             const user_id = req.user.id;
-            const id_allenamento = req.body.id_allenamento;
+            const { id_allenamento } = req.body;
             const result = await AllenamentiServices.clonaAllenamento(id_allenamento, user_id);
-            res.status(201).json({message: 'Allenamento clonato con successo', result});
+            res.status(201).json({ message: 'Allenamento clonato con successo', result });
         } catch (e) {
-            res.status(500).json({error: e.message});            
+            next(e);
         }
     };
 
-    static eliminaAllenamento = async (req, res) =>{
+    // DELETE elimina una scheda allenamento dato l'ID
+    static eliminaAllenamento = async (req, res, next) => {
         try {
-            const id_allenamento = req.params.id_allenamento;
+            const { id_allenamento } = req.params;
             await AllenamentiServices.eliminaAllenamento(id_allenamento);
-            res.status(201).json({message: 'Allenamento eliminato con successo'});
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.status(201).json({ message: 'Allenamento eliminato con successo' });
+        } catch (e) {
+            next(e);
         }
     };
 
 }
+
 module.exports = AllenamentiControllers;

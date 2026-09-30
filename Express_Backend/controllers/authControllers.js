@@ -2,33 +2,44 @@ const AuthServices = require('../services/authServices');
 
 class AuthControllers {
 
-    static login = async (req, res) => {
-        const {email, password} = req.body;
+    // POST autenticazione utente e generazione token JWT
+    static login = async (req, res, next) => {
+        const { email, password } = req.body;
         try {
             const result = await AuthServices.login(email, password);
-            return res.status(result.status).json({message: result.message, token: result.token});
-        } catch(e){
-            res.status(e.status || 500).json({error: e.message});
+            if (result.status && result.status !== 200) {
+                const err = new Error(result.message);
+                err.statusCode = result.status;
+                return next(err);
+            }
+            return res.status(201).json({ message: result.message, token: result.token });
+        } catch (e) {
+            if (e && e.status && !e.statusCode) e.statusCode = e.status;
+            next(e);
         }
     };
 
-    static register = async (req, res) => {
-        const {ruolo, id_ruolo_professionista, nome, cognome, email, password} = req.body;
+    // POST registrazione nuovo utente o professionista
+    static register = async (req, res, next) => {
+        const { ruolo, id_ruolo_professionista, nome, cognome, email, password } = req.body;
         try {
             const result = await AuthServices.registration(ruolo, id_ruolo_professionista, nome, cognome, email, password);
-            res.status(201).json({success: true, data: result});
+            res.status(201).json({ success: true, data: result });
         } catch (e) {
-            res.status(e?.status || 400).json({success: false, message: e.message});
+            if (e && e.status && !e.statusCode) e.statusCode = e.status;
+            next(e);
         }
     };
 
-    static getRuoliProfessionisti = async (req, res) => {
+    // GET ruoli disponibili per gli specialisti
+    static getRuoliProfessionisti = async (req, res, next) => {
         try {
             const result = await AuthServices.getRuoliProfessionisti();
             res.status(201).json(result);
         } catch (e) {
-            res.status(400).json({ success: false, message: e.message });
+            next(e);
         }
     };
 }
+
 module.exports = AuthControllers;

@@ -2,279 +2,312 @@ const UserServices = require('../services/userServices');
 
 class UserControllers {
 
-    static getUsers = async (req, res) => {
+    // GET tutti gli utenti
+    static getUsers = async (req, res, next) => {
         try {
             const utenti = await UserServices.getAllUsers();
             res.json(utenti);
-        } catch(e) {
-            res.status(500).json({error: e.message});
+        } catch (e) {
+            next(e);
         }
     };
 
-    static getUtenteById = async (req, res) => {
+    // GET utente dato il suo ID
+    static getUtenteById = async (req, res, next) => {
         try {
-            const id_utente = req.params.id_utente;
+            const { id_utente } = req.params;
             const dati = await UserServices.getUtenteById(id_utente);
-            if(dati){
-                res.json(dati);
-            }else{
-                res.status(404).json({error: 'Controller: dati non trovati'});
+            if (!dati) {
+                const err = new Error('Utente non trovato');
+                err.statusCode = 404;
+                return next(err);
             }
-        } catch(e) {
-            res.status(500).json({error: e.message});
-            
+            res.json(dati);
+        } catch (e) {
+            next(e);
         }
     };
 
-    static getInfoUtenteById = async (req, res) =>{
-        try{
-            const id_utente = req.params.id_utente;
-            const info = await UserServices.getInfoUtenteById(id_utente);
-            if(info){
-                res.json(info);
-            }else{
-                res.status(404).json({error: 'Controller: info non trovate' });
-            }
-        }catch(e){
-            res.status(500).json({error: e.message});
-        }
-    };
-
-    static getUtentiByRuolo = async (req, res) => {
+    // GET informazioni utente dato il suo ID
+    static getInfoUtenteById = async (req, res, next) => {
         try {
-            const ruolo = req.params.ruolo;
-            const result = await UserServices.getUtentiByRuolo(ruolo);
-            if(result){
-                res.json(result);
-            } else {
-                res.status(404).json({error: 'Utenti non trovati'});
+            const { id_utente } = req.params;
+            const info = await UserServices.getInfoUtenteById(id_utente);
+            if (!info) {
+                const err = new Error('Informazioni utente non trovate');
+                err.statusCode = 404;
+                return next(err);
             }
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.json(info);
+        } catch (e) {
+            next(e);
         }
     };
 
-    static getAlbo = async (req, res) => {
+    // GET utenti filtrati per ruolo
+    static getUtentiByRuolo = async (req, res, next) => {
+        try {
+            const { ruolo } = req.params;
+            const result = await UserServices.getUtentiByRuolo(ruolo);
+            if (!result) {
+                const err = new Error('Utenti non trovati per il ruolo specificato');
+                err.statusCode = 404;
+                return next(err);
+            }
+            res.json(result);
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    // GET elenco albo professionisti
+    static getAlbo = async (req, res, next) => {
         try {
             const result = await UserServices.getAlbo();
-            if(result){
-                res.json(result);
-            } else {
-                res.status(404).json({error: 'Albo non trovato'});
+            if (!result) {
+                const err = new Error('Albo non trovato');
+                err.statusCode = 404;
+                return next(err);
             }
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.json(result);
+        } catch (e) {
+            next(e);
         }
     };
 
-    static getRichieste = async (req, res) => {
+    // GET tutte le richieste
+    static getRichieste = async (req, res, next) => {
         try {
             const result = await UserServices.getRichieste();
-            if(result) {
-                res.json(result);
-            } else {
-                res.status(404).json({error: 'non trovato'});
+            if (!result) {
+                const err = new Error('Richieste non trovate');
+                err.statusCode = 404;
+                return next(err);
             }
+            res.json(result);
         } catch (e) {
-            res.status(500).json({error: e.message});
+            next(e);
         }
     };
 
-    static getRuoloProfessionista = async (req, res) => {
+    // GET ruolo di un determinato professionista
+    static getRuoloProfessionista = async (req, res, next) => {
         try {
-            const id_professionista = req.params.id_professionista;
+            const { id_professionista } = req.params;
             const result = await UserServices.getRuoloProfessionista(id_professionista);
-            if(result){
-                res.json(result);
-            } else {
-                res.status(404).json({error: 'Ruolo non trovato'});
+            if (!result) {
+                const err = new Error('Ruolo professionista non trovato');
+                err.statusCode = 404;
+                return next(err);
             }
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.json(result);
+        } catch (e) {
+            next(e);
         }
     };
 
-    static getAssociazioniUtente = async (req, res) => {
+    // GET associazioni dell'utente autenticato
+    static getAssociazioniUtente = async (req, res, next) => {
         try {
             const id_utente = req.user.id;
             const result = await UserServices.getAssociazioniUtente(id_utente);
-            if(result){
-                res.json(result);
-            } else {
-                res.status(404).json({error: 'Associazioni non trovate'});
+            if (!result) {
+                const err = new Error('Associazioni non trovate');
+                err.statusCode = 404;
+                return next(err);
             }
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.json(result);
+        } catch (e) {
+            next(e);
         }
     };
 
-    static getAssociazioniProfessionista = async (req, res) => {
+    // GET associazioni del professionista autenticato
+    static getAssociazioniProfessionista = async (req, res, next) => {
         try {
             const id_professionista = req.user.id;
             const result = await UserServices.getAssociazioniProfessionista(id_professionista);
-            if(result){
-                res.json(result);
-            } else {
-                res.status(404).json({error: 'Associazioni non trovate'});
+            if (!result) {
+                const err = new Error('Associazioni professionista non trovate');
+                err.statusCode = 404;
+                return next(err);
             }
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.json(result);
+        } catch (e) {
+            next(e);
         }
     };
 
-    static getRichiesteUtente = async (req, res) => {
+    // GET richieste inviate/ricevute dall'utente autenticato
+    static getRichiesteUtente = async (req, res, next) => {
         try {
             const id_utente = req.user.id;
             const result = await UserServices.getRichiesteUtente(id_utente);
-            if(result){
-                res.json(result);
-            } else {
-                res.status(404).json({error: 'Richieste non trovate'});
+            if (!result) {
+                const err = new Error('Richieste utente non trovate');
+                err.statusCode = 404;
+                return next(err);
             }
-            
+            res.json(result);
         } catch (e) {
-            res.status(500).json({error: e.message});
+            next(e);
         }
     };
 
-    static getRichiesteProfessionista = async (req, res) => {
+    // GET richieste inviate/ricevute dal professionista autenticato
+    static getRichiesteProfessionista = async (req, res, next) => {
         try {
             const id_professionista = req.user.id;
             const result = await UserServices.getRichiesteProfessionista(id_professionista);
-            if(result){
-                res.json(result);
-            } else {
-                res.status(404).json({error: 'Richieste non trovate'});
+            if (!result) {
+                const err = new Error('Richieste professionista non trovate');
+                err.statusCode = 404;
+                return next(err);
             }
-            
+            res.json(result);
         } catch (e) {
-            res.status(500).json({error: e.message});
+            next(e);
         }
     };
 
-    static getAssociazioniPending = async (req, res) => {
+    // GET associazioni in attesa (pending) dell'utente autenticato
+    static getAssociazioniPending = async (req, res, next) => {
         try {
             const id_utente = req.user.id;
             const result = await UserServices.getAssociazioniPending(id_utente);
-            if(result){
-                res.json(result);
-            } else {
-                res.status(404).json({error: 'Associazioni pending non trovate'});
+            if (!result) {
+                const err = new Error('Associazioni pending non trovate');
+                err.statusCode = 404;
+                return next(err);
             }
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.json(result);
+        } catch (e) {
+            next(e);
         }
     };
 
-    static getRichiestePending = async (req, res) => {
+    // GET richieste in attesa (pending) dell'utente autenticato
+    static getRichiestePending = async (req, res, next) => {
         try {
             const id_utente = req.user.id;
             const result = await UserServices.getRichiestePending(id_utente);
-            if(result){
-                res.json(result);
-            } else {
-                res.status(404).json({error: 'Richieste pending non trovate'});
+            if (!result) {
+                const err = new Error('Richieste pending non trovate');
+                err.statusCode = 404;
+                return next(err);
             }
-        } catch(e) {
-            res.status(500).json({error: e.message});
-        }
-    };
-
-    static getFeedAssociati = async (req, res) => {
-        try {
-        const user_id = req.user.id;
-        const result = await UserServices.getFeedAssociati(user_id);
-            if(result){
-                res.json(result);
-            } else {
-                res.status(404).json({error: 'Feed non trovato'});
-            }
+            res.json(result);
         } catch (e) {
-            res.status(500).json({error: e.message});
+            next(e);
         }
     };
 
-    static creaAssociazione = async (req, res) => {
+    // GET feed delle attività degli utenti associati
+    static getFeedAssociati = async (req, res, next) => {
+        try {
+            const user_id = req.user.id;
+            const result = await UserServices.getFeedAssociati(user_id);
+            if (!result) {
+                const err = new Error('Feed non trovato');
+                err.statusCode = 404;
+                return next(err);
+            }
+            res.json(result);
+        } catch (e) {
+            next(e);
+        }
+    };
+
+    // POST crea una nuova associazione
+    static creaAssociazione = async (req, res, next) => {
         try {
             const id_utente = req.user.id;
             const { id_persona } = req.body;
             const result = await UserServices.creaAssociazione(id_utente, id_persona);
-            res.status(201).json({message: 'Associazione creata con successo', result});
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.status(201).json({ message: 'Associazione creata con successo', result });
+        } catch (e) {
+            next(e);
         }
     };
 
-    static accettaAssociazione = async (req, res) => {
+    // PUT/POST accetta una richiesta di associazione
+    static accettaAssociazione = async (req, res, next) => {
         try {
             const { id_associazione } = req.body;
             const result = await UserServices.accettaAssociazione(id_associazione);
-            res.status(201).json({message: 'Associazione accettata con successo', result});
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.status(201).json({ message: 'Associazione accettata con successo', result });
+        } catch (e) {
+            next(e);
         }
     };
 
-    static creaRichiesta = async (req, res) => {
+    // POST crea una nuova richiesta di consulenza/revisione
+    static creaRichiesta = async (req, res, next) => {
         try {
             const user_id = req.user.id;
             const { dati } = req.body;
             const result = await UserServices.creaRichiesta(user_id, dati);
-            res.status(201).json({message: 'Richiesta creata con successo', result});
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.status(201).json({ message: 'Richiesta creata con successo', result });
+        } catch (e) {
+            next(e);
         }
     };
 
-    static accettaRichiesta = async (req, res) => {
+    // PUT/POST accetta una richiesta
+    static accettaRichiesta = async (req, res, next) => {
         try {
             const { richiesta } = req.body;
             const result = await UserServices.accettaRichiesta(richiesta);
-            res.status(201).json({message: 'Richiesta accettata con successo', result});
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.status(201).json({ message: 'Richiesta accettata con successo', result });
+        } catch (e) {
+            next(e);
         }
     };
 
-    static riempiInfo = async (req, res) =>{
-        try{
-            const {info} = req.body;
+    // POST/PUT inserisce o aggiorna le informazioni del profilo
+    static riempiInfo = async (req, res, next) => {
+        try {
+            const { info } = req.body;
             const result = await UserServices.riempiInfo(info);
-            res.status(201).json({message: 'Info riempite con successo', result});
-        }catch(e){
-            res.status(500).json({error: e.message});
+            res.status(201).json({ message: 'Informazioni salvate con successo', result });
+        } catch (e) {
+            next(e);
         }
     };
 
-    static aggiornaPassword = async (req, res) =>{
-        try{
+    // PUT aggiorna la password utente
+    static aggiornaPassword = async (req, res, next) => {
+        try {
             const id_utente = req.user.id;
-            const {vecchiaPassword, nuovaPassword } = req.body;
+            const { vecchiaPassword, nuovaPassword } = req.body;
             const result = await UserServices.aggiornaPassword(id_utente, vecchiaPassword, nuovaPassword);
-            res.status(201).json({message: 'Password aggiornata con successo', result});
-        }catch(e){
-            res.status(500).json({error: e.message});
+            res.status(201).json({ message: 'Password aggiornata con successo', result });
+        } catch (e) {
+            next(e);
         }
     };
 
-    static annullaAssociazione = async (req, res) => {
+    // DELETE annulla/elimina un'associazione
+    static annullaAssociazione = async (req, res, next) => {
         try {
-            const id_associazione = req.params.id_associazione;
+            const { id_associazione } = req.params;
             const result = await UserServices.annullaAssociazione(id_associazione);
-            res.status(201).json({message: 'Associazione annullata con successo', result});
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.status(201).json({ message: 'Associazione annullata con successo', result });
+        } catch (e) {
+            next(e);
         }
     };
 
-    static annullaRichiesta = async (req, res) => {
+    // DELETE annulla/elimina una richiesta
+    static annullaRichiesta = async (req, res, next) => {
         try {
-            const id_richiesta = req.params.id_richiesta;
+            const { id_richiesta } = req.params;
             const result = await UserServices.annullaRichiesta(id_richiesta);
-            res.status(201).json({message: 'Richiesta annullata con successo', result});
-        } catch(e) {
-            res.status(500).json({error: e.message});
+            res.status(201).json({ message: 'Richiesta annullata con successo', result });
+        } catch (e) {
+            next(e);
         }
     };
 }
+
 module.exports = UserControllers;
